@@ -100,6 +100,7 @@ const runProgram =
     r.context = vm.createContext({app: modules});
 
     process.on('exit', () => {
+      logger('Child is exiting...');
       saveReplHistory(r, replHistory);
       r.close();
       send(CHILD_CLOSING);
