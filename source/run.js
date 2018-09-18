@@ -101,7 +101,11 @@ const runProgram =
 
     process.on('exit', () => {
       saveReplHistory(r, replHistory);
+      r.close();
       send(CHILD_CLOSING);
+      process.nextTick(() => {
+        process.exit(0);
+      });
     });
 
     return;
