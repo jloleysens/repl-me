@@ -1,0 +1,22 @@
+{
+  "name": "repl-me",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jean-Louis Leysens",
+  "license": "MIT",
+  "scripts": {
+    "start": "DEBUG=repl-me:* CHECK_TYPES=1 node source/index.js",
+    "test": "CHECK_TYPES=1 ava --watch"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0",
+    "eslint-config-standard": "^11.0.0"
+  },
+  "dependencies": {
+    "ava": "^0.25.0",
+    "chokidar": "2.0.4",
+    "debug": "^4.0.1",
+    "sanctuary": "0.15.0",
+    "sanctuary-def": "0.18.1"
+  }
+}

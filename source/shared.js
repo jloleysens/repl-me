@@ -1,0 +1,4 @@
+module.exports = {
+  CHILD_CLOSING: 'CHILD_CLOSING',
+  CHILD_ERRORED: 'CHILD_ERRORED',
+}
