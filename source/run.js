@@ -10,13 +10,15 @@ const { resolve } = require('path');
 const { Pair, encase, maybeToNullable, Nothing, splitOnRegex, pipe, filter, trim } = S;
 const logger = log = require('debug')('repl-me:child');
 const freeze = Object.freeze;
-const { CHILD_CLOSING, CHILD_ERRORED } = require('./shared');
+const { CHILD_CLOSING, CHILD_STARTED, CHILD_ERR } = require('./shared');
 
 
 logger('Checking Types:', checkTypes)
 
 //    attemptRequire :: String -> Maybe Pair
 const attemptRequire = encase((path) => Pair (require(path)) (path) );
+
+const send = code => process.send({ code });
 
 const installReplHistory = (replServer, replFilePath) => {
   try {
@@ -89,13 +91,7 @@ const runProgram =
   ({})
   ([$.Unknown, $.Undefined])
   (({input, output, sourceDir = '.', ignore = [], ignoreDefault = ['node_modules', 'test.js'], replHistory}) => {
-    let modules
-    try {
-      modules = collectModules({sourceDir, ignore: ignore.concat(ignoreDefault)});
-    } catch (e) {
-      process.send({code: CHILD_ERRORED});
-      throw e;
-    }
+    const modules = collectModules({sourceDir, ignore: ignore.concat(ignoreDefault)});
     r = repl.start({ output });
 
     logger('Installing history from', replHistory);
@@ -105,7 +101,7 @@ const runProgram =
 
     process.on('exit', () => {
       saveReplHistory(r, replHistory);
-      process.send({code: CHILD_CLOSING});
+      send(CHILD_CLOSING);
     });
 
     return;
@@ -123,10 +119,16 @@ if (require.main == module) {
     logger('Detected sendable sub-process...');
   }
 
-  runProgram({
-    sourceDir: '.',
-    input: process.stdin,
-    ouput: process.stdout,
-    replHistory: process.env.NODE_REPL_HISTORY,
-  });
+  try {
+    runProgram({
+      sourceDir: '.',
+      input: process.stdin,
+      ouput: process.stdout,
+      replHistory: process.env.NODE_REPL_HISTORY,
+    });
+    send(CHILD_STARTED);
+  } catch(e) {
+    console.log(e);
+    send(CHILD_ERR);
+  }
 }

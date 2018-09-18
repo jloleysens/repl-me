@@ -1,5 +1,5 @@
 function one() {
-  console.log('one and done and donest');
+  console.log('one and h');
 }
 
 function two(arg) {
