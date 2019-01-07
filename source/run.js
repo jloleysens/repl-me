@@ -126,7 +126,7 @@ if (require.main == module) {
 
   try {
     runProgram({
-      sourceDir: '.',
+      sourceDir: './example-app',
       input: process.stdin,
       ouput: process.stdout,
       replHistory: process.env.NODE_REPL_HISTORY,
