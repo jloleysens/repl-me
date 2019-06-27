@@ -5,19 +5,19 @@ const { CHILD_CLOSING, CHILD_STARTED, CHILD_ERR } = require('./shared');
 const HOME_DIR = require('os').homedir();
 
 (function main() {
-  let child, childStarted;
+  let child;
 
   const killChild = () => {
-    if (child && childStarted) {
+    if (child) {
       logger(`Killing child: ${child.pid}`)
-      process.kill(child.pid);
+      // process.kill(child.pid);
+      child.kill();
     }
     child = null;
   };
 
   const starter = (options) => () => {
     killChild();
-    childStarted = false;
     try {
       child = cp.fork(
         './source/run.js',
@@ -36,13 +36,12 @@ const HOME_DIR = require('os').homedir();
 
         switch (message.code) {
           case CHILD_CLOSING:
-            process.kill(-child.pid);
             process.nextTick(() => {
               process.exit(0);
             });
             break;
           case CHILD_STARTED:
-            childStarted = true;
+            logger(`${child.pid} started...`);
             break;
           case CHILD_ERR:
             console.log('App has errors... REPL will restart once errors have been fixed');

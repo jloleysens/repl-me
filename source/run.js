@@ -7,7 +7,7 @@ const repl = require('repl');
 const vm = require('vm');
 const fs = require('fs');
 const { resolve } = require('path');
-const { Pair, encase, maybeToNullable, Nothing, splitOnRegex, pipe, filter, trim } = S;
+const { Pair, encase, Nothing, splitOnRegex, pipe, filter, trim, maybeToEither } = S;
 const logger = log = require('debug')('repl-me:child');
 const freeze = Object.freeze;
 const { CHILD_CLOSING, CHILD_STARTED, CHILD_ERR } = require('./shared');
@@ -72,11 +72,19 @@ const collectModules =
           recursivelyScanDir(dir + '/' + entry);
         }
         if ((/\.js$/).test(entry)) {
-          const serialized = maybeToNullable(attemptRequire(entryWithPrefix));
-          if (serialized) {
-            const path = splitPathToKeys(dir + '/' + entry);
-            assignPathToModules(path.slice(-1), serialized.fst);
-          }
+          pipe([
+            attemptRequire,
+            v => {
+              console.log(v);
+              return v;
+            },
+            maybeToEither(Pair ('nada') ({})),
+            v => {
+              console.log(v);
+              return v;
+            },
+            (pair) => assignPathToModules(splitPathToKeys(dir + '/' + entry).slice(-1), pair.fst)
+          ]) (entryWithPrefix);
         }
       }
     };
